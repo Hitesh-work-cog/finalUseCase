@@ -8,7 +8,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "static_website_bucket" {
 
-  bucket = "nehanth-bucket-unique-name" # Replace with a unique bucket name
+  bucket = "final-use-case-23062025" # Replace with a unique bucket name
 
   # acl = "public-read" # Keep this commented out or removed as per previous fix
 
