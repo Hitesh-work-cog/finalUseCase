@@ -1,111 +1,253 @@
-provider "aws" {
+resource "aws_iam_role" "codepipeline_role" {
 
-  region = "ap-south-1" # Or your desired AWS region
+name = "codepipeline-role-for-s3-deployment"
+
+
+
+assume_role_policy = jsonencode({
+
+"Version": "2012-10-17",
+
+"Statement": [
+
+{
+
+"Effect": "Allow",
+
+"Principal": {
+
+"Service": "codepipeline.amazonaws.com"
+
+},
+
+"Action": "sts:AssumeRole"
+
+}
+
+]
+
+})
 
 }
 
 
 
-resource "aws_s3_bucket" "static_website_bucket" {
+resource "aws_iam_role_policy" "codepipeline_s3_policy" {
 
-  bucket = "nehanth-bucket-unique-name" # Replace with a unique bucket name
+name = "codepipeline-s3-access-policy"
 
-  # acl = "public-read" # Keep this commented out or removed as per previous fix
-
-
-
-  website {
-
-    index_document = "index.html"
-
-  }
+role = aws_iam_role.codepipeline_role.id
 
 
 
-  tags = {
+policy = jsonencode({
 
-    Project     = "StaticWebsiteDeployment"
+"Version": "2012-10-17",
 
-    Environment = "Production"
+"Statement": [
 
-  }
+{
+
+"Effect": "Allow",
+
+"Action": [
+
+"s3:GetObject",
+
+"s3:PutObject",
+
+"s3:PutObjectAcl",
+
+"s3:ListBucket",
+
+"s3:DeleteObject"
+
+],
+
+"Resource": [
+
+"${aws_s3_bucket.static_website_bucket.arn}",
+
+"${aws_s3_bucket.static_website_bucket.arn}/*"
+
+]
+
+},
+
+{
+
+"Effect": "Allow",
+
+"Action": [
+
+"codedeploy:CreateDeployment",
+
+"codedeploy:GetApplication",
+
+"codedeploy:GetDeployment",
+
+"codedeploy:GetDeploymentConfig",
+
+"codedeploy:RegisterApplicationRevision",
+
+"codedeploy:ListApplications",
+
+"codedeploy:ListDeploymentConfigs",
+
+"codedeploy:ListDeployments",
+
+"codedeploy:ListApplicationRevisions"
+
+],
+
+"Resource": "*"
+
+},
+
+{
+
+"Effect": "Allow",
+
+"Action": [
+
+"codebuild:StartBuild",
+
+"codebuild:BatchGetBuilds",
+
+"codebuild:StopBuild"
+
+],
+
+"Resource": "*"
+
+}
+
+]
+
+})
 
 }
 
 
 
-# --- Add this Block Public Access resource ---
+resource "aws_iam_role_policy_attachment" "codepipeline_admin_access" {
 
-resource "aws_s3_bucket_public_access_block" "static_website_bucket_public_access_block" {
+role = aws_iam_role.codepipeline_role.name
 
-  bucket = aws_s3_bucket.static_website_bucket.id
-
-
-
-  # Set these to false to allow public policies for static website hosting
-
-  block_public_acls       = false # Not strictly needed for bucket policies, but good to set if you ever considered ACLs
-
-  block_public_policy     = false
-
-  ignore_public_acls      = false # Not strictly needed for bucket policies
-
-  restrict_public_buckets = false
-
-}
-
-# --- End of Block Public Access resource ---
-
-
-
-
-
-resource "aws_s3_bucket_policy" "static_website_bucket_policy" {
-
-  bucket = aws_s3_bucket.static_website_bucket.id
-
-
-
-  # Ensure this policy allows GetObject for public read
-
-  policy = jsonencode({
-
-    "Version": "2012-10-17",
-
-    "Statement": [
-
-      {
-
-        "Sid": "PublicReadGetObject",
-
-        "Effect": "Allow",
-
-        "Principal": "*",
-
-        "Action": "s3:GetObject",
-
-        "Resource": [
-
-          "${aws_s3_bucket.static_website_bucket.arn}/*"
-
-        ]
-
-      }
-
-    ]
-
-  })
-
-
-  # Add a dependency to ensure the public access block is configured first
-
-  depends_on = [aws_s3_bucket_public_access_block.static_website_bucket_public_access_block]
+policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 
 }
 
 
-output "website_endpoint" {
 
-  value = aws_s3_bucket.static_website_bucket.website_endpoint
+resource "aws_iam_role" "codebuild_role" {
+
+name = "codebuild-role-for-static-website"
+
+
+
+assume_role_policy = jsonencode({
+
+"Version": "2012-10-17",
+
+"Statement": [
+
+{
+
+"Effect": "Allow",
+
+"Principal": {
+
+"Service": "codebuild.amazonaws.com"
+
+},
+
+"Action": "sts:AssumeRole"
+
+}
+
+]
+
+})
+
+}
+
+
+
+resource "aws_iam_role_policy" "codebuild_s3_policy" {
+
+name = "codebuild-s3-access-policy"
+
+role = aws_iam_role.codebuild_role.id
+
+
+
+policy = jsonencode({
+
+"Version": "2012-10-17",
+
+"Statement": [
+
+{
+
+"Effect": "Allow",
+
+"Action": [
+
+"s3:GetObject",
+
+"s3:PutObject",
+
+"s3:PutObjectAcl",
+
+"s3:ListBucket",
+
+"s3:DeleteObject"
+
+],
+
+"Resource": [
+
+"${aws_s3_bucket.static_website_bucket.arn}",
+
+"${aws_s3_bucket.static_website_bucket.arn}/*"
+
+]
+
+},
+
+{
+
+"Effect": "Allow",
+
+"Action": [
+
+"logs:CreateLogGroup",
+
+"logs:CreateLogStream",
+
+"logs:PutLogEvents"
+
+],
+
+"Resource": "arn:aws:logs:*:*:*"
+
+}
+
+]
+
+})
+
+}
+
+
+
+# New attachment for the CodeBuild role
+
+resource "aws_iam_role_policy_attachment" "codebuild_admin_access" {
+
+role = aws_iam_role.codebuild_role.name
+
+policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 
 }
