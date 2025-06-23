@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complex HTML Example</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+    }
+    header, footer {
+      background: #333;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      background: #444;
+      padding: 0.5rem;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .svg-icon {
+      width: 100px;
+      height: 100px;
+      margin: auto;
+      display: block;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 400px;
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    input, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Complex HTML Page</h1>
+</header>
+
+<nav>
+  <a href="#">Home</a>
+  <a href="#">Features</a>
+  <a href="#">Contact</a>
+</nav>
+
+<main class="grid-container">
+  <section class="card">
+    <h2>Interactive SVG</h2>
+    <svg class="svg-icon" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="40" stroke="blue" stroke-width="4" fill="lightblue" />
+    </svg>
+  </section>
+
+  <section class="card">
+    <h2>Open Modal</h2>
+    <button onclick="openModal()">Click Me</button>
+  </section>
+
+  <section class="card">
+    <h2>Contact Form</h2>
+    <form onsubmit="return validateForm()">
+      <input type="text" id="name" placeholder="Your Name" required />
+      <input type="email" id="email" placeholder="Your Email" required />
+      <button type="submit">Submit</button>
+    </form>
+  </section>
+</main>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2>Hello!</h2>
+    <p>This is a modal popup.</p>
+    <button onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2025 Complex HTML Example</p>
+</footer>
+
+<script>
+  function openModal() {
+    document.getElementById('modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+
+  function validateForm() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!name || !email) {
+      alert('Please fill out all fields.');
+      return false;
+    }
+    alert('Form submitted successfully!');
+    return true;
+  }
+</script>
+
+</body>
+</html>
+
