@@ -8,7 +8,6 @@ phases:
   post_build:
     commands:
       - echo "Build complete. Preparing artifacts for deployment."
-      # No need for a manual zip command here if using base-directory and discard-paths
 
 artifacts:
   files:
